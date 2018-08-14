@@ -14,11 +14,9 @@ public class Apriori{
 
     /** the list of current itemsets */
     private List<int[]> itemsets;
-    /** the set of all items */
-    private HashSet<Integer> items;
     /** total number of transactions */
     private int numTrans;
-    /** total number of items*/
+    /** total number of items(maximum # of all items)*/
     private int numItems;
     /** the transaction filename */
     private String transFilename;
@@ -29,6 +27,7 @@ public class Apriori{
 
     public Apriori(String[] args){
         configure(args);
+        execute();
     }
 
     private void configure(String[] args){
@@ -44,7 +43,6 @@ public class Apriori{
         try{
             fr = new FileReader(transFilename);
             br = new BufferedReader(fr);
-            items = new HashSet<Integer>();
 
             String tran;
 
@@ -54,19 +52,99 @@ public class Apriori{
                 numTrans++;
                 String[] tranStrArray = tran.replaceAll("\\s+", "").split(",");
                 for(int i = 0; i < tranStrArray.length; i++){
-                    items.add(Integer.parseInt(tranStrArray[i]));
+                    int num = Integer.parseInt(tranStrArray[i]);
+                    if(num+1 > numItems)    numItems = num+1;
                 } 
             }
-            numItems = items.size();
         }
         catch(IOException e){
             e.printStackTrace();
+        }
+        finally{
+            try{
+                if(fr != null)  fr.close();
+                if(br != null)  br.close();
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
         }
         log("=============== Configuration ===============");
         log("Dataset name: " + transFilename);
         log("Total transactions: " + numTrans);
         log("Total items: " + numItems);
         log("=========================================");
+    }
+
+    private void execute(){
+        itemsets = new ArrayList<int[]>();
+        genCandidateItemsetOfSize1();
+        
+        while(itemsets.size() > 1){
+            genFrequentItemSet();
+            break;
+        }
+    }
+
+    private void genFrequentItemSet(){
+        List<int[]> frequentItemsets = new ArrayList<int[]>();
+        BufferedReader br = null;
+        FileReader fr = null;
+        try{
+            fr = new FileReader(transFilename);
+            br = new BufferedReader(fr);
+        }
+        catch(IOException e){
+           e.printStackTrace(); 
+        }
+
+        // Calculate each itemset counts in all transactions
+        int[] count = new int[itemsets.size()];
+
+        // Use boolean array to show whether the item existed in certain transaction or not
+        boolean[] trans = new boolean[numItems];
+
+        for(int i = 0; i < numTrans; i++){
+            String line = new String();
+            try{
+                line = br.readLine();
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
+            lineToBooleanArray(line, trans);
+            for(int j = 0; j < itemsets.size(); j++){
+                boolean match = true;
+                int[] cand = itemsets.get(j);
+                for(int k = 0; k < cand.length; k++){
+                    if(trans[cand[k]] == false){
+                        match = false;
+                        break;
+                    }
+                }
+                if(match){
+                    count[j]++;
+                }
+            }
+        }
+    }
+
+    private void lineToBooleanArray(String line, boolean[] trans){
+        if(line.matches("\\s*"))    return;
+        // fill the boolean array with all false
+        Arrays.fill(trans, false);
+        String[] tranArray = line.replaceAll("\\s+", "").split(",");
+        for(int i = 0; i < tranArray.length; i++){
+            int index = Integer.parseInt(tranArray[i]);
+            trans[index] = true;
+        }
+    }
+
+    private void genCandidateItemsetOfSize1(){
+        for(int i = 0; i < numItems; i++){
+            int[] cand = {i};
+            itemsets.add(cand);
+        }
     }
 
     /** print out some messages */
