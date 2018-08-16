@@ -12,6 +12,8 @@ public class Apriori{
         Apriori ap = new Apriori(args);
     } 
 
+    /** the list of previous itemsets */
+    private List<int[]> preitemsets;
     /** the list of current itemsets */
     private List<int[]> itemsets;
     /** total number of transactions */
@@ -26,8 +28,29 @@ public class Apriori{
     private double minConf;
 
     public Apriori(String[] args){
+        long startTime = System.currentTimeMillis();
         configure(args);
         execute();
+        long endTime = System.currentTimeMillis();
+        long collapsedTime = endTime - startTime;
+        log("Execution Time: " + collapsedTime/1000.0 + "sec");
+        outputMemoryConsumption();
+    }
+
+    private static final long MEGABYTE = 1024L * 1024L;
+
+    public static long bytesToMegabytes(long bytes) {
+        return bytes / MEGABYTE;
+    }
+
+    private void outputMemoryConsumption(){
+        // Get the Java runtime
+        Runtime runtime = Runtime.getRuntime();
+        // Run the garbage collector
+        runtime.gc();
+        // Calculate the used memory
+        long memory = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("Used memory is bytes: " + memory);;
     }
 
     private void configure(String[] args){
@@ -77,13 +100,70 @@ public class Apriori{
     }
 
     private void execute(){
+        preitemsets = new ArrayList<int[]>();
         itemsets = new ArrayList<int[]>();
         genCandidateItemsetOfSize1();
-        
-        while(itemsets.size() > 1){
+        genFrequentItemSet();
+        //outputFrequentItemSet();
+        while(itemsets.size() > 0){          
+            if(genCandidateItemSetFromPreviousItemSet())
+                break;
             genFrequentItemSet();
-            break;
+            //outputFrequentItemSet();
         }
+    }
+
+    private void outputFrequentItemSet(){
+        for(int i = 0; i < itemsets.size(); i++){
+            int[] tmp = itemsets.get(i);
+            log(Arrays.toString(tmp));
+        }
+    }
+
+    private void outputPreFrequentItemSet(){
+        for(int i = 0; i < preitemsets.size(); i++){
+            int[] tmp = preitemsets.get(i);
+            log(Arrays.toString(tmp));
+        }
+    }
+
+    private boolean genCandidateItemSetFromPreviousItemSet(){
+        int currentItemSetSize = itemsets.get(0).length;
+        List<int[]> newCandidateItemSet = new ArrayList<int[]>();
+        for(int i = 0; i < itemsets.size(); i++){
+            for(int j = i+1; j < itemsets.size(); j++){
+                int numDifferent = 0;
+                int[] newCand = new int[currentItemSetSize+1];
+
+                int[] X = itemsets.get(i);
+                int[] Y = itemsets.get(j);
+
+                for(int k = 0; k < Y.length; k++){
+                    newCand[k] = Y[k];
+                }
+
+                boolean found = true;
+                for(int index = 0; index < X.length-1; index++){
+                    if(X[index] != Y[index]){
+                        found = false;
+                        break;
+                    }
+                }
+                if(found == true){
+                    newCand[currentItemSetSize] = X[X.length-1];
+                    Arrays.sort(newCand);
+                    newCandidateItemSet.add(newCand);
+                }
+            }
+        }
+
+        if(newCandidateItemSet.size() == 0){
+            outputFrequentItemSet();
+            return true;
+        }
+        preitemsets = itemsets;
+        itemsets = newCandidateItemSet;
+        return false;
     }
 
     private void genFrequentItemSet(){
@@ -127,6 +207,25 @@ public class Apriori{
                 }
             }
         }
+        // Print out candidate Itemset 
+        /*
+        for(int i = 0; i < itemsets.size(); i++){
+            System.out.println(Arrays.toString(itemsets.get(i)) + ":" + count[i]);
+        }
+        */
+        
+        // Decide the frequent Itemset of size k(based on count[])
+        for(int i = 0; i < itemsets.size(); i++){
+            if(count[i] >= numTrans*minSup){
+                frequentItemsets.add(itemsets.get(i));                
+            }
+        }
+
+        if(frequentItemsets.size() == 0){
+            outputPreFrequentItemSet();
+        }
+        
+        itemsets = frequentItemsets;
     }
 
     private void lineToBooleanArray(String line, boolean[] trans){
@@ -141,7 +240,7 @@ public class Apriori{
     }
 
     private void genCandidateItemsetOfSize1(){
-        for(int i = 0; i < numItems; i++){
+        for(int i = 1; i < numItems; i++){
             int[] cand = {i};
             itemsets.add(cand);
         }
@@ -152,4 +251,3 @@ public class Apriori{
         System.err.println(str);
     }
 }
-
