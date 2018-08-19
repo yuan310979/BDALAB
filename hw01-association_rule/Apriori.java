@@ -12,6 +12,10 @@ public class Apriori{
         Apriori ap = new Apriori(args);
     } 
 
+    private List<int[]> assoRuleLHS;
+
+    /** the list of previous itemsets */
+    private List<int[]> finalitemsets;
     /** the list of previous itemsets */
     private List<int[]> preitemsets;
     /** the list of current itemsets */
@@ -31,6 +35,7 @@ public class Apriori{
         long startTime = System.currentTimeMillis();
         configure(args);
         execute();
+        genAssociationRule();
         long endTime = System.currentTimeMillis();
         long collapsedTime = endTime - startTime;
         log("Execution Time: " + collapsedTime/1000.0 + "sec");
@@ -159,6 +164,7 @@ public class Apriori{
 
         if(newCandidateItemSet.size() == 0){
             outputFrequentItemSet();
+            finalitemsets = itemsets;
             return true;
         }
         preitemsets = itemsets;
@@ -223,6 +229,7 @@ public class Apriori{
 
         if(frequentItemsets.size() == 0){
             outputPreFrequentItemSet();
+            finalitemsets = preitemsets;
         }
         
         itemsets = frequentItemsets;
@@ -243,6 +250,66 @@ public class Apriori{
         for(int i = 1; i < numItems; i++){
             int[] cand = {i};
             itemsets.add(cand);
+        }
+    }
+
+    private void genAssociationRule(){
+        log("========== Generate association rule ==========");
+        
+        for(int i = 0; i < finalitemsets.size(); i++){
+            printSubset(finalitemsets.get(i));
+            // printAssociationRule(finalitemsets.get(i), finalitemsets.get(i).length);
+        }
+
+        log("===============================================");
+    }
+
+    private void printSubset(int[] arr){
+        // input array length
+        int n = arr.length;
+
+        // use bit operation to get all possible subset
+        // Ex:
+        // if   arr = [1, 2, 3, 4]
+        //      n = 4
+        //      0000 => {}
+        //      0010 => {2}
+        //      0111 => {1,2,3}
+        for(int i = 1; i < (1<<n)-1; i++){
+            // i will be range from 1 to 2^n-1 (regardless of empty set and the origin set)
+            // ex: {} -> {1,2,3,4}
+            //     {1,2,3,4} -> {}
+
+            // Store the rule's LHS(left hand side) and RHS(right hand side) in each for loop
+            int[] LHS = new int[n];
+            int[] RHS = new int[n];
+            int indexLHS=0, indexRHS=0;
+
+            // Print current subset
+            for(int j = 0; j < n; j++){
+                
+                if( (i & (1<<j)) > 0){
+                    LHS[indexLHS] = arr[j];
+                    indexLHS++;
+                    // System.out.print(arr[j]+" ");
+                }
+                else{
+                    RHS[indexRHS] = arr[j];
+                    indexRHS++;
+                }
+            }
+            
+            System.out.print("{ ");
+            for(int j = 0; j < indexLHS; j++){
+                System.out.print(LHS[j]+" ");
+            }
+            System.out.print("} --> { ");
+
+            for(int j = 0; j < indexRHS; j++){
+                System.out.print(RHS[j]+" ");
+            }
+            System.out.print("}");
+            System.out.println();
         }
     }
 
