@@ -265,6 +265,8 @@ public class Apriori{
     }
 
     private void printSubset(int[] arr){
+        float occurLHSpRHS = occurenceCount(arr, arr.length);
+
         // input array length
         int n = arr.length;
 
@@ -309,8 +311,46 @@ public class Apriori{
                 System.out.print(RHS[j]+" ");
             }
             System.out.print("}");
+            System.out.print(" " + occurLHSpRHS/occurenceCount(LHS, indexLHS));
             System.out.println();
         }
+    }
+
+    private int occurenceCount(int[] cand, int length){
+        BufferedReader br = null;
+        FileReader fr = null;
+        try{
+            fr = new FileReader(transFilename);
+            br = new BufferedReader(fr);
+        }
+        catch(IOException e){
+           e.printStackTrace(); 
+        }
+
+        int count = 0;
+        boolean[] trans = new boolean[numItems];
+
+        for(int i = 0; i < numTrans; i++){
+            String line = new String();
+            try{
+                line = br.readLine();
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
+            lineToBooleanArray(line, trans);
+            boolean match = true;
+            for(int k = 0; k < length; k++){
+                if(trans[cand[k]] == false){
+                    match = false;
+                    break;
+                }
+            }   
+            if(match)
+                count++;
+        }
+
+        return count;
     }
 
     /** print out some messages */
