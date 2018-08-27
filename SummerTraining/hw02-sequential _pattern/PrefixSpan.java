@@ -8,6 +8,10 @@ public class PrefixSpan{
      *  @param args[1] minSupportRate
      */
 
+    // for statistics
+    long startTime;
+    long endTime;
+
     private String datasetFilename;
     private double minSupportRate;
 
@@ -22,8 +26,9 @@ public class PrefixSpan{
     }
 
     public void run(){
-        
-        long startTime = System.currentTimeMillis();
+        MemoryLogger.getInstance().reset();
+
+        startTime = System.currentTimeMillis();
 
         FileIO io = new FileIO(this.datasetFilename);
         ArrayList<Transaction> listOfTrans = io.readFileFromTransDatabase();
@@ -51,12 +56,12 @@ public class PrefixSpan{
         
         totalPattern = totalPattern + frequentInitSingleItem.size();
         
-        long endTime = System.currentTimeMillis();
+        endTime = System.currentTimeMillis();
 
         String fileName = String.format("%s_%f.txt", this.datasetFilename, this.minSupportRate);
         io.printSequentialPattern(sequentialPattern, fileName);
-        System.out.println("Time: " + (endTime-startTime)/1000.0 + " sec");
-        System.out.println("Total of Sequence: " + totalPattern);
+        printStatisticInfo();   
+        
     }
 
     public void recursiveSearch(Sequence prefix, Database pd){
@@ -68,5 +73,12 @@ public class PrefixSpan{
             recursiveSearch(newPrefix, newPD);
         }
         totalPattern = totalPattern + cands.size();
+        MemoryLogger.getInstance().checkMemory();
+    }
+
+    public void printStatisticInfo(){
+        System.out.println("Time: " + (endTime-startTime)/1000.0 + " sec");
+        System.out.println("Momory: " + MemoryLogger.getMaxMemory() + "MB");
+        System.out.println("Total of Sequence: " + totalPattern);
     }
 }
