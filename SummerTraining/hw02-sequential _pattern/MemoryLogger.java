@@ -36,5 +36,8 @@ public class MemoryLogger{
 	*/
 	public void checkMemory(){
 		double currentMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024d / 1024d;
+		if (currentMemory > maxMemory) { 
+			maxMemory = currentMemory; 
+		} 
 	}
 }
