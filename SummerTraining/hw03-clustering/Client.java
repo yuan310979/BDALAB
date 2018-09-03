@@ -25,9 +25,9 @@ public class Client{
 		}
 
 		FileIO io = new FileIO(args[0]);
-		ArrayList<ArrayList<Double>> metric  = new ArrayList<ArrayList<Double>>();;
 		ArrayList<Point> pointArr = io.readFileFromDatasetAndGenPointArr();
-
+		Metric metric  = Metric.getDistanceMetricFromPoints(pointArr);
+		
 		DBSCAN algo = new DBSCAN(metric, eps, minPts);
 	}
 
