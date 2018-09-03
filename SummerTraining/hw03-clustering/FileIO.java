@@ -25,7 +25,26 @@ public class FileIO{
         }
     }
 
-    // public ArrayList<Point> readFileFromDataset(){
+    public ArrayList<Point> readFileFromDatasetAndGenPointArr(){
+    	ArrayList<Point> pointArr = new ArrayList<>();
 
-    // }
+    	try{
+            String str;
+            while((str = br.readLine()) != null){
+                String[] arr = str.split("\\s+");
+                double[] data = new double[arr.length-1];
+                for(int i = 0; i < arr.length-1; i++){
+                	data[i] = Double.parseDouble(arr[i]);
+                }
+                int flag = Integer.parseInt(arr[arr.length-1]);
+                Point p = new Point(data, flag);
+                pointArr.add(p);
+            }
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+
+        return pointArr;
+	}
 }

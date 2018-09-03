@@ -2,12 +2,14 @@ import java.util.ArrayList;
 
 public class Point{
 	private double[] data;
+	private int flag;
 
-	public Point(double[] d){
+	public Point(double[] d, int flag){
 		data = new double[d.length];
 		for(int i = 0; i < d.length; i++){
-			data[i] = d[i];
+			this.data[i] = d[i];
 		}
+		this.flag = flag;
 	}
 
 	public void printPoint(){

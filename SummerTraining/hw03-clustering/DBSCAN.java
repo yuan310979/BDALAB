@@ -5,8 +5,8 @@ import java.util.ArrayList;
 */
 
 public class DBSCAN{
-	/** name of input dataset */
-	private String fileName;
+	/** metric of each two points' distance */
+	private ArrayList<ArrayList<Double>> metric;
 
 	/** maximum radius to consider point as core */
 	private double eps;
@@ -14,17 +14,17 @@ public class DBSCAN{
 	/** the number of which a core point should contain other points */
 	private int minPts;
 
-	public DBSCAN(String fileName, double eps, int minPts) throws DBSCANException{
-		setFileName(fileName);
+	public DBSCAN(ArrayList<ArrayList<Double>> metric, double eps, int minPts) throws DBSCANException{
+		setMetric(metric);
 		setEps(eps);
 		setMinPts(minPts);
 	}
 
-	public void setFileName(String fileName) throws DBSCANException{
-		if(fileName == null){
-			throw new DBSCANException("filename can not be empty!");
+	public void setMetric(ArrayList<ArrayList<Double>> metric) throws DBSCANException{
+		if(metric == null){
+			throw new DBSCANException("metric can not be empty!");
 		}
-		this.fileName = fileName;
+		this.metric = metric;
 	}
 
 	public void setEps(Double eps){

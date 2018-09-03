@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Client{
 	public static void main(String[] args) throws DBSCANException{
 		double eps;
@@ -22,7 +24,11 @@ public class Client{
 			throw new DBSCANException("Parameter fileName should not be empty!");
 		}
 
-		DBSCAN algo = new DBSCAN(args[0], eps, minPts);
+		FileIO io = new FileIO(args[0]);
+		ArrayList<ArrayList<Double>> metric  = new ArrayList<ArrayList<Double>>();;
+		ArrayList<Point> pointArr = io.readFileFromDatasetAndGenPointArr();
+
+		DBSCAN algo = new DBSCAN(metric, eps, minPts);
 	}
 
 	public static void log(String str){
