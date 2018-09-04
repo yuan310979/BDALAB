@@ -18,6 +18,9 @@ public class DBSCAN{
 	/** the number of which a core point should contain other points */
 	private int minPts;
 
+	long startTime;
+	long endTime;
+
 	/** DBSCAN constant */
 	private static final int CORE = 0;
 	private static final int BORDER = 1;
@@ -57,6 +60,8 @@ public class DBSCAN{
 	}
 
 	public void run(){
+		MemoryLogger.getInstance().reset();
+		startTime = System.currentTimeMillis();
 		// number of points
 		int size = metric.getMetric().get(0).size();
 
@@ -83,7 +88,10 @@ public class DBSCAN{
 					clusteringResult.add(neighbors);
 				}	
 			}
+			MemoryLogger.getInstance().checkMemory();
 		}
+		endTime = System.currentTimeMillis();
+		printStatisticInfo();   
 	}
 
 	public ArrayList<Integer> mergeNeighbors(ArrayList<Integer> arr1, ArrayList<Integer> arr2){
@@ -146,5 +154,10 @@ public class DBSCAN{
 
 	public void log(String str){
 		System.out.println("DBSCAN: " + str);
+	}
+
+	public void printStatisticInfo(){
+		System.out.println("Time: " + (endTime-startTime)/1000.0 + " sec");
+        System.out.println("Momory: " + MemoryLogger.getMaxMemory() + "MB");
 	}
 }
