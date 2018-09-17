@@ -1,6 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Stack;
 import java.util.HashSet;
 import java.util.Collections;
 
@@ -18,6 +16,9 @@ public class DBSCAN{
 	/** the number of which a core point should contain other points */
 	private int minPts;
 
+	/** all input data points */
+	private ArrayList<Point> dataPts;
+
 	long startTime;
 	long endTime;
 
@@ -32,10 +33,11 @@ public class DBSCAN{
 	/** result of DBSCAN  */
 	private ArrayList<ArrayList<Integer>> clusteringResult;
 
-	public DBSCAN(Metric metric, double eps, int minPts) throws DBSCANException{
+	public DBSCAN(Metric metric, double eps, int minPts, ArrayList<Point> data) throws DBSCANException{
 		setMetric(metric);
 		setEps(eps);
 		setMinPts(minPts);
+		setDataPts(data);
 		visitedPoints = new HashSet<Integer>();
 		clusteringResult = new ArrayList<ArrayList<Integer>>();
 	}
@@ -54,6 +56,8 @@ public class DBSCAN{
 	public void setMinPts(int minPts){
 		this.minPts = minPts;
 	}
+
+    public void setDataPts(ArrayList<Point> data) { this.dataPts = data; }
 
 	public ArrayList<ArrayList<Integer>> getResult(){
 		return this.clusteringResult;
@@ -150,6 +154,11 @@ public class DBSCAN{
 			System.out.println();
 		}
 		System.out.println("=========================================================");
+	}
+
+	public void drawResult(){
+        Drawer drawer = new Drawer();
+        drawer.drawScatter2D(dataPts, clusteringResult);
 	}
 
 	public void log(String str){

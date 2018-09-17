@@ -29,9 +29,10 @@ public class Client{
 		ArrayList<Point> pointArr = io.readFileFromDatasetAndGenPointArr();
 		Metric metric  = Metric.getDistanceMetricFromPoints(pointArr);
 
-		DBSCAN algo = new DBSCAN(metric, eps, minPts);
+		DBSCAN algo = new DBSCAN(metric, eps, minPts, pointArr);
 		algo.run();
 		algo.printResult();
+		algo.drawResult();
 	}
 
 	public static void log(String str){
